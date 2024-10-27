@@ -1,40 +1,25 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
+import Description from "./Description/Description";
+import Options from "./Options/Options";
+import Feedback from "./Feedback/Feedback";
+import Notification from "./Notification/Notification";
 
-// Компонент Feedback для відображення статистики
-const Feedback = ({ good, neutral, bad, totalFeedback, positiveFeedback }) => (
-	<div>
-		<h2>Feedback Statistics</h2>
-		<p>Good: {good}</p>
-		<p>Neutral: {neutral}</p>
-		<p>Bad: {bad}</p>
-		<p>Total Feedback: {totalFeedback}</p>
-		<p>Positive Feedback: {positiveFeedback}%</p>
-	</div>
-);
-
-// Компонент Options для кнопок відгуків
-const Options = ({ onLeaveFeedback, onReset, totalFeedback }) => (
-	<div>
-		<h2>
-			Please leave your feedback about our service by selecting one of the
-			options below.
-		</h2>
-		<button onClick={() => onLeaveFeedback("good")}>Good</button>
-		<button onClick={() => onLeaveFeedback("neutral")}>Neutral</button>
-		<button onClick={() => onLeaveFeedback("bad")}>Bad</button>
-		{totalFeedback > 0 && <button onClick={onReset}>Reset</button>}
-	</div>
-);
-
-// Компонент Notification для повідомлення про відсутність статистики
-const Notification = () => <p>No feedback given yet.</p>;
-
-// Основний компонент App
 const App = () => {
-	// Ініціалізація стану
 	const [feedback, setFeedback] = useState({ good: 0, neutral: 0, bad: 0 });
 
-	// Функція для оновлення стану відгуків
+	// Ініціалізація стану з localStorage
+	useEffect(() => {
+		const storedFeedback = localStorage.getItem("feedback");
+		if (storedFeedback) {
+			setFeedback(JSON.parse(storedFeedback));
+		}
+	}, []);
+
+	// Збереження стану в localStorage при зміні
+	useEffect(() => {
+		localStorage.setItem("feedback", JSON.stringify(feedback));
+	}, [feedback]);
+
 	const updateFeedback = (feedbackType) => {
 		setFeedback((prevFeedback) => ({
 			...prevFeedback,
@@ -42,15 +27,11 @@ const App = () => {
 		}));
 	};
 
-	// Функція для скидання відгуків
 	const resetFeedback = () => {
 		setFeedback({ good: 0, neutral: 0, bad: 0 });
 	};
 
-	// Підрахунок загальної кількості відгуків
 	const totalFeedback = feedback.good + feedback.neutral + feedback.bad;
-
-	// Підрахунок відсотка позитивних відгуків
 	const positiveFeedback = totalFeedback
 		? Math.round((feedback.good / totalFeedback) * 100)
 		: 0;
@@ -58,6 +39,7 @@ const App = () => {
 	return (
 		<div>
 			<h1>Sip Happens Café</h1>
+			<Description />
 			<Options
 				onLeaveFeedback={updateFeedback}
 				onReset={resetFeedback}
